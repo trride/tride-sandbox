@@ -1,0 +1,29 @@
+{
+  "name": "tride-sandbox",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "micro",
+    "dev": "micro-dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trride/tride-sandbox.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/trride/tride-sandbox/issues"
+  },
+  "homepage": "https://github.com/trride/tride-sandbox#readme",
+  "dependencies": {
+    "micro": "^9.0.0",
+    "microrouter": "^3.0.0",
+    "mongoose": "^4.13.0"
+  },
+  "devDependencies": {
+    "micro-dev": "^1.3.0"
+  }
+}
