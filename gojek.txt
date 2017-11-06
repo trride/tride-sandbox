@@ -1,0 +1,56 @@
+// estimate
+/gojek/v2/calculate/gopay
+{
+  price: result.data.totalCash,
+  requestKey: {
+    key: result.data.estimate_token,
+    expiresAt: Date.now() + ms("5 minutes")
+  }
+}
+
+// requestRide
+/go-ride/v4/bookings
+{
+  service: 'gojek',
+  requestId: order_number
+}
+
+// getStatus
+/gojek/v2/booking/findByOrderNo/${orderNo}
+if (result.data.cancelReasonId === null) {
+  orderStatus = result.data.driverName === null ? 'not_found' : 'completed'
+} else {
+  orderStatus = 'canceled';
+}
+{
+  status: orderStatus,
+  service: 'gojek',
+  requestId: orderNo,
+  driver: {
+    name: result.data.driverName || null,
+    rating: null,
+    pictureUrl: result.data.driverPhoto || null,
+    phoneNumber: result.data.driverPhone || null,
+    vehicle: {
+      plate: result.data.noPolisi || null,
+      name: result.data.driverVehicleBrand || null
+    }
+  }
+}
+
+// cancelRide
+/gojek/v2/booking/cancelBooking
+{
+  service: 'gojek',
+  success: statusCode === 200 ? true : false
+}
+
+// getActiveBooking
+/v1/customers/active_bookings
+{
+  bookings: [
+    {
+      order_number: orderNo
+    }
+  ]
+}
