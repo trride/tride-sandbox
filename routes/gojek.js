@@ -1,4 +1,4 @@
-const { send } = require('micro')
+const { send, json } = require('micro')
 const shortid = require('shortid')
 const db = require('../firebase')
 
@@ -19,7 +19,10 @@ module.exports = {
     const val = snapshot.val()
     const bookings = Object.keys(val)
         .filter(key => val[key].status != 'completed')
-        .map(key => ({order_number: key}))
+        .map(key => ({
+          status: val[key].status,
+          order_number: key
+        }))
     
     send(res, 200, {
         data: {
@@ -45,11 +48,11 @@ module.exports = {
     send(res, 200, snapshot.val())
   },
 
-  cancelRide: (req, res) => {
-    const payload = req.body //noticed
-    db.ref(REF).child(SERVICE).child(payload.orderNo).set({
+  cancelRide: async (req, res) => {
+    const { orderNo } = await json(req)
+    db.ref(REF).child(SERVICE).child(orderNo).set({
       status: 'driver_canceled',
-      request_id: requestId,
+      request_id: orderNo,
       driver: null,
       vehicle: null
     })

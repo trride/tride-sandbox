@@ -3,29 +3,30 @@ const shortid = require('shortid')
 const db = require('../firebase')
 
 const REF = 'sandbox'
-const SERVICE = 'uber'
+const SERVICE = 'grab'
 
 module.exports = {
   getEstimate: (req, res) => {
-    send(res, 200, {
-      fare: {
-        value: 10000,
-        fare_id: shortid.generate(),
-        expires_at: Math.floor(Date.now() / 1000) + (5 * 60)
+    send(res, 200, [
+      {
+        upperBound: 1000000,
+        lowerBound: 1000000,
+        fixed: true,
+        signature: shortid.generate()
       }
-    })
+    ])
   },
 
   requestRide: (req, res) => {
     const requestId = shortid.generate()
     db.ref(REF).child(SERVICE).child(requestId).set({
-      status: 'processing',
+      status: 'ALLOCATING',
       request_id: requestId,
       driver: null,
       vehicle: null
     })
     send(res, 200, {
-      request_id: requestId
+      code: requestId
     })
   },
 
@@ -38,7 +39,7 @@ module.exports = {
   cancelRide: (req, res) => {
     const { requestId } = req.params
     db.ref(REF).child(SERVICE).child(requestId).set({
-      status: 'driver_canceled',
+      status: 'CANCELLED',
       request_id: requestId,
       driver: null,
       vehicle: null
@@ -50,38 +51,35 @@ module.exports = {
 
   modifyRequest: async (requestId, status) => {
     const request_id = requestId
-    const driver = {
-      name: 'John Doe',
-      rating: 4.8,
-      picture_url: 'https://blogs.timesofindia.indiatimes.com/wp-content/uploads/2015/12/mark-zuckerberg.jpg',
-      phone_number: '081234567890'
-    }
-    const vehicle = {
-      license_plate: 'B 1234 AA',
-      make: 'Honda',
-      model: 'Vario'
-    }
+    // const driver = {
+    //   name: 'John Doe',
+    //   rating: 4.8,
+    //   picture_url: 'https://blogs.timesofindia.indiatimes.com/wp-content/uploads/2015/12/mark-zuckerberg.jpg',
+    //   phone_number: '081234567890'
+    // }
+    // const vehicle = {
+    //   license_plate: 'B 1234 AA',
+    //   make: 'Honda',
+    //   model: 'Vario'
+    // }
 
     const statuses = {
       'not_found': {
-        status: 'no_drivers_available',
-        request_id
+        reason: 'unallocated'
       },
       'accepted': {
-        status: 'accepted',
-        request_id, driver, vehicle
+        status: 'ALLOCATED',
+        activeStepIndex: 0
       },
       'canceled': {
-        status: 'driver_canceled',
-        request_id
+        status: 'CANCELLED'
       },
       'on_the_way': {
-        status: 'in_progress',
-        request_id, driver, vehicle
+        status: 'ALLOCATED',
+        activeStepIndex: 1
       },
       'completed': {
-        status: 'completed',
-        request_id
+        status: 'COMPLETED'
       }
     }
 
